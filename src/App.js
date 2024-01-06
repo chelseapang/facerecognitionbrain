@@ -18,7 +18,7 @@ import ParticlesBg from 'particles-bg'
 const returnClarifaiRequestOptions = (imageUrl) => {
   // Your PAT (Personal Access Token) can be found in the portal under Authentification
   //TODO: remove PAT before pushing to github
-  const PAT = 'a35840f6ff84458c83211f0428333248';
+  const PAT = '';
   // Specify the correct user_id/app_id pairings
   // Since you're making inferences outside your app's scope
   const USER_ID = 'cpang5';
