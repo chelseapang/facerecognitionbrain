@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 // import Clarifai from 'clarifai';
 import './App.css';
 import Navigation from './components/Navigation/Navigation';
+import Signin from './components/Signin/Signin';
 import Logo from './components/Logo/Logo';
 import Rank from './components/Rank/Rank';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
@@ -103,6 +104,7 @@ class App extends Component {
       <div className="App">
         <ParticlesBg type="circle" bg={true} />
         <Navigation />
+        <Signin />
         <Logo />
         <Rank />
         <ImageLinkForm
