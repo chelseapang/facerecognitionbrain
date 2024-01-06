@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Clarifai from 'clarifai';
+// import Clarifai from 'clarifai';
 import './App.css';
 import Navigation from './components/Navigation/Navigation';
 import Logo from './components/Logo/Logo';
@@ -8,65 +8,50 @@ import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import ParticlesBg from 'particles-bg'
 
-const app = new Clarifai.App({
-  //TODO: remove API before pushing to github
-  apiKey: ''
-});
+// const app = new Clarifai.App({
+//   //TODO: remove API before pushing to github
+//   apiKey: ''
+// });
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// In this section, we set the user authentication, user and app ID, model details, and the URL
-// of the image we want as an input. Change these strings to run your own example.
-//////////////////////////////////////////////////////////////////////////////////////////////////
+const returnClarifaiRequestOptions = (imageUrl) => {
+  // Your PAT (Personal Access Token) can be found in the portal under Authentification
+  //TODO: remove PAT before pushing to github
+  const PAT = 'a35840f6ff84458c83211f0428333248';
+  // Specify the correct user_id/app_id pairings
+  // Since you're making inferences outside your app's scope
+  const USER_ID = 'cpang5';
+  const APP_ID = 'face-recognition-brain';
+  // Change these to whatever model and image URL you want to use
+  const MODEL_ID = 'face-detection';
+  const IMAGE_URL = imageUrl;
 
-// Your PAT (Personal Access Token) can be found in the portal under Authentification
-//TODO: remove PAT before pushing to github
-const PAT = 'YOUR_PAT_HERE';
-// Specify the correct user_id/app_id pairings
-// Since you're making inferences outside your app's scope
-const USER_ID = 'clarifai';
-const APP_ID = 'main';
-// Change these to whatever model and image URL you want to use
-const MODEL_ID = 'general-image-recognition';
-const MODEL_VERSION_ID = 'aa7f35c01e0642fda5cf400f543e7c40';
-const IMAGE_URL = 'https://samples.clarifai.com/metro-north.jpg';
-
-///////////////////////////////////////////////////////////////////////////////////
-// YOU DO NOT NEED TO CHANGE ANYTHING BELOW THIS LINE TO RUN THIS EXAMPLE
-///////////////////////////////////////////////////////////////////////////////////
-
-const raw = JSON.stringify({
-  "user_app_id": {
-    "user_id": USER_ID,
-    "app_id": APP_ID
-  },
-  "inputs": [
-    {
-      "data": {
-        "image": {
-          "url": IMAGE_URL
+  const raw = JSON.stringify({
+    "user_app_id": {
+      "user_id": USER_ID,
+      "app_id": APP_ID
+    },
+    "inputs": [
+      {
+        "data": {
+          "image": {
+            "url": IMAGE_URL
+          }
         }
       }
-    }
-  ]
-});
+    ]
+  });
 
-const requestOptions = {
-  method: 'POST',
-  headers: {
-    'Accept': 'application/json',
-    'Authorization': 'Key ' + PAT
-  },
-  body: raw
-};
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Key ' + PAT
+    },
+    body: raw
+  };
 
-// NOTE: MODEL_VERSION_ID is optional, you can also call prediction with the MODEL_ID only
-// https://api.clarifai.com/v2/models/{YOUR_MODEL_ID}/outputs
-// this will default to the latest version_id
-
-fetch("https://api.clarifai.com/v2/models/" + MODEL_ID + "/versions/" + MODEL_VERSION_ID + "/outputs", requestOptions)
-  .then(response => response.text())
-  .then(result => console.log(result))
-  .catch(error => console.log('error', error));
+  return requestOptions;
+}
 
 class App extends Component {
   constructor() {
@@ -83,7 +68,17 @@ class App extends Component {
     const image = document.getElementById('inputImage');
     const width = Number(image.width);
     const height = Number(image.height);
-    console.log(width, height);
+    return {
+      leftCol: clarifaiFace.leftCol * width,
+      topRow: clarifaiFace.topRow * height,
+      rightCol: width - (clarifaiFace.rightCol * width),
+      bottomRow: height - (clarifaiFace.bottomRow * height)
+    }
+  }
+
+  displayFaceBox = (box) => {
+    console.log(box);
+    this.setState({ box: box });
   }
 
   onInputChange = (event) => {
@@ -92,10 +87,12 @@ class App extends Component {
 
   onButtonSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    app.models.predict(
-      "face-detection",
-      this.state.input)
-      .then(response => this.calculateFaceLocation(response))
+    // app.models.predict(
+    //   "face-detection",
+    //   this.state.input)
+      fetch("https://api.clarifai.com/v2/models/" + 'face-detection' + "/outputs", returnClarifaiRequestOptions(this.state.input))
+  .then(response => response.json())
+      .then(response => this.displayFaceBox(this.calculateFaceLocation(response)))
       .catch(err => console.log(err));
   }
 
@@ -110,7 +107,7 @@ class App extends Component {
           onInputChange={this.onInputChange}
           onButtonSubmit={this.onButtonSubmit}
         />
-        <FaceRecognition imageUrl={this.state.imageUrl} />
+        <FaceRecognition box={this.state.box} imageUrl={this.state.imageUrl} />
       </div>
     );
   }
