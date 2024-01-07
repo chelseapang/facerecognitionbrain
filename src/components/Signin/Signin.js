@@ -9,16 +9,28 @@ class Signin extends React.Component {
         }
     }
     onEmailChange = (event) => {
-        this.setState({signinEmil: event.target.value})
+        this.setState({signInEmail: event.target.value})
     }
 
     onPasswordChange = (event) => {
-        this.setState({signinPassword: event.target.value})
+        this.setState({signInPassword: event.target.value})
     }
 
     onSubmitSignIn = () => {
-        console.log(this.state);
-        this.props.onRouteChange('home');
+        fetch('http://localhost:3000/signin', {
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                email: this.state.signInEmail,
+                password: this.state.signInPassword
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data === 'success') {
+                this.props.onRouteChange('home');
+            }
+        })
     }
 
     render() {
