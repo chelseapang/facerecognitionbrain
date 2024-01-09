@@ -87,6 +87,10 @@ class App extends Component {
   }
 
   calculateFaceLocation = (data) => {
+    if (!data || !data.outputs || !data.outputs[0] || !data.outputs[0].data || !data.outputs[0].data.regions || !data.outputs[0].data.regions[0]) {
+      // If any expected property is undefined, return an empty object or handle it as appropriate
+      return {};
+    }
     const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
     console.log('clarifaiFace', clarifaiFace);
     const image = document.getElementById('inputImage');
@@ -116,7 +120,22 @@ class App extends Component {
     //   this.state.input)
     fetch("https://api.clarifai.com/v2/models/" + 'face-detection' + "/outputs", returnClarifaiRequestOptions(this.state.input))
       .then(response => response.json())
-      .then(response => this.displayFaceBox(this.calculateFaceLocation(response)))
+      .then(response => {
+        if (response) {
+          fetch('http://localhost:3000/image', {
+            method: 'put',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: this.state.user.id
+            })
+          })
+            .then(response => response.json())
+            .then(count => {
+              this.setState(Object.assign(this.state.user, { entries: count }))
+            })
+        }
+        this.displayFaceBox(this.calculateFaceLocation(response))
+      })
       .catch(err => console.log(err));
   }
 
@@ -138,7 +157,7 @@ class App extends Component {
         {route === 'home'
           ? <div>
             <Logo />
-            <Rank />
+            <Rank name={this.state.user.name} entries={this.state.user.entries} />
             <ImageLinkForm
               onInputChange={this.onInputChange}
               onButtonSubmit={this.onButtonSubmit}
@@ -147,7 +166,7 @@ class App extends Component {
           </div>
           : (
             route === 'signin'
-              ? <Signin onRouteChange={this.onRouteChange} />
+              ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
               : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
           )
         }
