@@ -10,13 +10,6 @@ import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import ParticlesBg from 'particles-bg'
 
-// const app = new Clarifai.App({
-//   //TODO: remove API before pushing to github
-//   apiKey: ''
-// });
-
-
-
 const initialState = {
   input: '',
   imageUrl: '',
